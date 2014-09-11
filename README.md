@@ -1,4 +1,4 @@
 forecast-io
 ===========
 
-Forecast IO Wrapper implementation
+Forecast IO Wrapper implementation: http://forecast.io/
