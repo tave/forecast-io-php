@@ -1,0 +1,21 @@
+{
+    "name": "jpirkey/forecast-io",
+    "homepage": "https://www.tave.com",
+    "description": "PHP wrapper for Forecast IO API",
+    "keywords": ["forecast","forecast-io","tave"],
+    "type": "library",
+    "license": "BSD",
+    "authors": [
+        {
+            "name": "Jason Pirkey",
+            "homepage": "http://www.tave.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "guzzlehttp/guzzle": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {"Forecast\\": "src/"}
+    }
+}
