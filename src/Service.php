@@ -100,6 +100,17 @@ class Service {
   {
     if (count(func_get_args()) > 0) {
       $this->connectTimeout = intval($seconds);
+
+      // We don't want connect timeout to be greater than the entire connect-response timeout
+      if ($this->connectTimeout == 0) {
+        // Wait for-ev-er
+        $this->timeout(0);
+      }
+      else if ($this->connectTimeout > $this->timeout) {
+        // Just add one to the connection timeout
+        $this->timeout($this->connectTimeout + 1);
+      }
+
       return $this;
     }
 
