@@ -1,5 +1,5 @@
 {
-    "name": "jpirkey/forecast-io-php",
+    "name": "tave/forecast-io-php",
     "homepage": "https://www.tave.com",
     "description": "PHP wrapper for Forecast IO API",
     "keywords": ["forecast","forecast-io","tave"],
