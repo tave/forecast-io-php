@@ -8,7 +8,7 @@ Forecast IO APIv2 Wrapper implementation: http://forecast.io/
 
 {
   "require" : {
-    "jpirkey/forecast-io-php": "1.0.*"
+    "tave/forecast-io-php": "1.0.*"
   }
 }
 
