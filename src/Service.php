@@ -211,4 +211,72 @@ class Service {
       return false;
     }
   }
+
+  public function batch($requests, $options = [])
+  {
+
+    $this->lastError = null;
+    $this->lastRequest = null;
+    $this->lastResponse = null;
+
+    if (empty($this->accessKey)) {
+      $this->lastError = "No access key set.  Please set an access key before attempting to fetch forecast data.";
+    }
+
+    if ( ! $this->httpClient) {
+      $this->httpClient = new \GuzzleHttp\Client();
+    }
+
+    $baseURL = rtrim(self::ENDPOINT,'/') . '/' . $this->accessKey . '/';
+    $httpRequests = [];
+    foreach ( $requests as $idx => $request ) {
+      $url = $baseURL . $request['latitude'] . ',' . $request['longitude'];
+
+      if ( ! empty($request['time']) ) {
+        $url .= ',' . $request['time'];
+      }
+
+      if ( $options ) {
+        $url .= '?' . http_build_query($options);
+      }
+
+      $requests[$idx]['url'] = $url;
+
+      $httpRequests[] = $this->httpClient->createRequest('GET', $url, [
+        'allow_redirects' => true,
+        'timeout' => $this->timeout,
+        'connect_timeout' => $this->connectTimeout,
+        'headers' => [ 'User-Agent' => 'Tave/ForecastIOWrapper' ]
+      ]);
+    }
+
+    try {
+      $httpResults = \GuzzleHttp\batch($this->httpClient, $httpRequests);
+
+      foreach ( $httpResults as $httpRequest ) {
+        $url = $httpRequest->getUrl();
+        foreach ( $requests as $idx => $request ) {
+          if ( $request['url'] == $url ) {
+            if ( $httpResults[$httpRequest] instanceof GuzzleHttp\Exception\RequestException) {
+              $this->lastRequest = $httpResults[$httpRequest]->getRequest();
+              $this->lastResponse = $httpResults[$httpRequest]->hasResponse() ? $httpResults[$httpRequest]->getResponse() : null;
+              $this->lastError = $httpResults[$httpRequest]->getMessage();
+              $requests[$idx]['error'] = $this->lastError;
+            }
+            else {
+              $requests[$idx]['forecast'] = $httpResults[$httpRequest]->json();
+            }
+          }
+        }
+      }
+
+      return $requests;
+    }
+    catch (GuzzleHttp\Exception\RequestException $e) {
+      $this->lastRequest = $e->getRequest();
+      $this->lastResponse = $e->hasResponse() ? $e->getResponse() : null;
+      $this->lastError = $e->getMessage();
+      return false;
+    }
+  }
 }
