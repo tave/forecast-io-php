@@ -204,7 +204,7 @@ class Service {
 
       return $Response->json();
     }
-    catch (GuzzleHttp\Exception\RequestException $e) {
+    catch (\GuzzleHttp\Exception\RequestException $e) {
       $this->lastRequest = $e->getRequest();
       $this->lastResponse = $e->hasResponse() ? $e->getResponse() : null;
       $this->lastError = $e->getMessage();
@@ -257,7 +257,7 @@ class Service {
         $url = $httpRequest->getUrl();
         foreach ( $requests as $idx => $request ) {
           if ( $request['url'] == $url ) {
-            if ( $httpResults[$httpRequest] instanceof GuzzleHttp\Exception\RequestException) {
+            if ( $httpResults[$httpRequest] instanceof \GuzzleHttp\Exception\RequestException) {
               $this->lastRequest = $httpResults[$httpRequest]->getRequest();
               $this->lastResponse = $httpResults[$httpRequest]->hasResponse() ? $httpResults[$httpRequest]->getResponse() : null;
               $this->lastError = $httpResults[$httpRequest]->getMessage();
@@ -272,7 +272,7 @@ class Service {
 
       return $requests;
     }
-    catch (GuzzleHttp\Exception\RequestException $e) {
+    catch (\GuzzleHttp\Exception\RequestException $e) {
       $this->lastRequest = $e->getRequest();
       $this->lastResponse = $e->hasResponse() ? $e->getResponse() : null;
       $this->lastError = $e->getMessage();
