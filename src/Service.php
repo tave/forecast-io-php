@@ -251,20 +251,20 @@ class Service {
     }
 
     try {
-      $httpResults = \GuzzleHttp\batch($this->httpClient, $httpRequests);
+      $httpResults = \GuzzleHttp\Pool::batch($this->httpClient, $httpRequests);
 
-      foreach ( $httpResults as $httpRequest ) {
-        $url = $httpRequest->getUrl();
+      foreach ( $httpResults as $resultIdx => $httpRequest ) {
+        $url = $httpRequest->getEffectiveUrl();
         foreach ( $requests as $idx => $request ) {
           if ( $request['url'] == $url ) {
-            if ( $httpResults[$httpRequest] instanceof \GuzzleHttp\Exception\RequestException) {
-              $this->lastRequest = $httpResults[$httpRequest]->getRequest();
-              $this->lastResponse = $httpResults[$httpRequest]->hasResponse() ? $httpResults[$httpRequest]->getResponse() : null;
-              $this->lastError = $httpResults[$httpRequest]->getMessage();
+            if ( $httpResults[$resultIdx] instanceof \GuzzleHttp\Exception\RequestException) {
+              $this->lastRequest = $httpResults[$resultIdx]->getRequest();
+              $this->lastResponse = $httpResults[$resultIdx]->hasResponse() ? $httpResults[$resultIdx]->getResponse() : null;
+              $this->lastError = $httpResults[$resultIdx]->getMessage();
               $requests[$idx]['error'] = $this->lastError;
             }
             else {
-              $requests[$idx]['forecast'] = $httpResults[$httpRequest]->json();
+              $requests[$idx]['forecast'] = $httpResults[$resultIdx]->json();
             }
           }
         }
