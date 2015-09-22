@@ -202,7 +202,7 @@ class Service {
         'headers' => [ 'User-Agent' => 'Tave/ForecastIOWrapper' ]
       ]);
 
-      return $Response->json();
+      return json_decode($Response->getBody(), true);
     }
     catch (\GuzzleHttp\Exception\RequestException $e) {
       $this->lastRequest = $e->getRequest();
@@ -228,7 +228,7 @@ class Service {
     }
 
     $baseURL = rtrim(self::ENDPOINT,'/') . '/' . $this->accessKey . '/';
-    $httpRequests = [];
+    $httpRequestPromises = [];
     foreach ( $requests as $idx => $request ) {
       $url = $baseURL . $request['latitude'] . ',' . $request['longitude'];
 
@@ -242,7 +242,7 @@ class Service {
 
       $requests[$idx]['url'] = $url;
 
-      $httpRequests[] = $this->httpClient->createRequest('GET', $url, [
+      $httpRequestPromises[$idx] = $this->httpClient->getAsync($url, [
         'allow_redirects' => true,
         'timeout' => $this->timeout,
         'connect_timeout' => $this->connectTimeout,
@@ -251,22 +251,17 @@ class Service {
     }
 
     try {
-      $httpResults = \GuzzleHttp\Pool::batch($this->httpClient, $httpRequests);
+      $httpResults = \GuzzleHttp\Promise\unwrap($httpRequestPromises);
 
-      foreach ( $httpResults as $resultIdx => $httpRequest ) {
-        $url = $httpRequest->getEffectiveUrl();
-        foreach ( $requests as $idx => $request ) {
-          if ( $request['url'] == $url ) {
-            if ( $httpResults[$resultIdx] instanceof \GuzzleHttp\Exception\RequestException) {
-              $this->lastRequest = $httpResults[$resultIdx]->getRequest();
-              $this->lastResponse = $httpResults[$resultIdx]->hasResponse() ? $httpResults[$resultIdx]->getResponse() : null;
-              $this->lastError = $httpResults[$resultIdx]->getMessage();
-              $requests[$idx]['error'] = $this->lastError;
-            }
-            else {
-              $requests[$idx]['forecast'] = $httpResults[$resultIdx]->json();
-            }
-          }
+      foreach ( $httpResults as $idx => $httpResponse ) {
+        if ($httpResponse instanceof \GuzzleHttp\Exception\RequestException) {
+          $this->lastRequest = $requests[$idx];
+          $this->lastResponse = $httpResponse;
+          $this->lastError = $httpResults[$resultIdx]->getMessage();
+          $requests[$idx]['error'] = $this->lastError;
+        }
+        else {
+          $requests[$idx]['forecast'] = json_decode($httpResponse->getBody(), true);
         }
       }
 
