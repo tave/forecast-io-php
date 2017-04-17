@@ -1,7 +1,7 @@
 <?php
 namespace Forecast;
 class Service {
-  const ENDPOINT = 'https://api.forecast.io/forecast/';
+  const ENDPOINT = 'https://api.darksky.net/forecast/';
 
   /**
    * GuzzleHttp Client
